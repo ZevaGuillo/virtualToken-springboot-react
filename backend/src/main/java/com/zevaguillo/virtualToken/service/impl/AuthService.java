@@ -1,8 +1,13 @@
 package com.zevaguillo.virtualToken.service.impl;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.stream.Collectors;
+
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -39,29 +44,48 @@ public class AuthService implements IAuthService {
         UserEntity userEntity = getUserByUsername(username);
         log.info("Intentando autenticar al usuario: {}", userEntity.getUsername());
 
-
         Authentication authentication = authenticate(userEntity, password);
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         String accessToken = jwtUtils.createToken(authentication);
 
-        UserResponse userResponse = new UserResponse(userEntity.getId(), userEntity.getUsername(), userEntity.getEmail());
+        UserResponse userResponse = new UserResponse(userEntity.getId(), userEntity.getUsername(),
+                userEntity.getEmail());
 
         return new AuthResponse(userResponse, "User Loged successfuly", accessToken, true);
     }
 
     @Override
     public AuthResponse createUser(AuthCreateUserRequest authCreateUserRequest) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'createUser'");
+        String username = authCreateUserRequest.username();
+        String password = authCreateUserRequest.password();
+        String email = authCreateUserRequest.email();
+
+        UserEntity userEntity = UserEntity.builder()
+                .username(username)
+                .email(email)
+                .password(passwordEncoder.encode(password))
+                .build();
+
+        UserEntity userCreated = userRepository.save(userEntity);
+
+        Authentication authentication = new UsernamePasswordAuthenticationToken(userCreated.getUsername(), null,
+                new ArrayList<>());
+        String accessToken = jwtUtils.createToken(authentication);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        UserResponse userResponse = new UserResponse(userCreated.getId(), userCreated.getUsername(),
+                userCreated.getEmail());
+
+        return new AuthResponse(userResponse, "User created successfully", accessToken, true);
     }
 
-    private Authentication authenticate(UserEntity user, String password){
+    private Authentication authenticate(UserEntity user, String password) {
 
         UserDetails userDetails = UserPrincipal.create(user);
 
-        if(!passwordEncoder.matches(password, userDetails.getPassword())){
+        if (!passwordEncoder.matches(password, userDetails.getPassword())) {
             throw new BadCredentialsException("Invalid Password");
         }
 

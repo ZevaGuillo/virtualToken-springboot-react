@@ -20,6 +20,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import com.zevaguillo.virtualToken.security.filter.JwtTokenFilter;
 import com.zevaguillo.virtualToken.security.service.CustomUserDetailsService;
+import com.zevaguillo.virtualToken.security.utils.AuthEntryPointJwt;
 
 import lombok.RequiredArgsConstructor;
 
@@ -28,6 +29,7 @@ import lombok.RequiredArgsConstructor;
 @EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
+    private final AuthEntryPointJwt unauthorizedHandler;
 
     @Bean
     public JwtTokenFilter authenticationJwtTokenFilter() {
@@ -62,6 +64,7 @@ public class SecurityConfig {
 
         return httpSecurity
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .exceptionHandling(handling -> handling.authenticationEntryPoint(unauthorizedHandler))
                 .authorizeHttpRequests(http -> {
                     http.requestMatchers(HttpMethod.POST, "/auth/**").permitAll();
                     http.requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll();
