@@ -24,6 +24,16 @@ public class TokenService implements ITokenService {
     private final TokenRepository tokenRepository;
     private final UserRepository userRepository;
 
+    /**
+     * Genera un nuevo token de autenticación para un usuario específico o devuelve
+     * un token activo existente si aún es válido.
+     *
+     * @param client El ID del cliente, proporcionado como una cadena de texto.
+     * @return Un objeto `TokenDto` que contiene la información del token generado o
+     *         el token existente si aún es válido.
+     * @throws UsernameNotFoundException Si el usuario no es encontrado en la base
+     *                                   de datos.
+     */
     @Override
     public TokenDto generateToken(String client) {
 
@@ -57,10 +67,38 @@ public class TokenService implements ITokenService {
         throw new UsernameNotFoundException("Usuario no encontrado");
     }
 
+    /**
+     * Valida y consume un token para un cliente específico. Si el token es válido,
+     * se marca como "usado".
+     * Si es inválido, se marca como "inactivo".
+     *
+     * @param client   El ID del cliente, proporcionado como una cadena de texto.
+     * @param tokenStr El token que se intenta reclamar.
+     * @return `true` si el token es válido y fue usado exitosamente, `false` en
+     *         caso contrario.
+     */
     @Override
     public boolean claimToken(String client, String tokenStr) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'claimToken'");
+        Optional<UserEntity> user = userRepository.findById(Long.parseLong(client));
+
+        if (user.isPresent()) {
+            Optional<TokenEntity> token = tokenRepository.findByUserAndStatus(user.get(), "activo");
+
+            // Si el token es válido y no ha expirado, marcarlo como "usado"
+            if (token.isPresent() && token.get().getToken().equals(tokenStr)
+                    && token.get().getExpirationTime().isAfter(LocalDateTime.now())) {
+                token.get().setStatus("usado");
+                tokenRepository.save(token.get());
+
+                return true;
+            } else {
+                // Si el token es inválido o ha expirado, marcarlo como "inactivo"
+                token.get().setStatus("inactivo");
+                tokenRepository.save(token.get());
+            }
+        }
+
+        return false;
     }
 
 }
