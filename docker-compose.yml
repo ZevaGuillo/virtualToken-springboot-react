@@ -6,9 +6,9 @@ services:
     ports:
       - "5432:5432"
     environment:
-      - POSTGRES_USER=alumno
+      - POSTGRES_USER=zevaguillo
       - POSTGRES_PASSWORD=123456
-      - POSTGRES_DB=security
+      - POSTGRES_DB=virtualtoken
     networks:
       - spring-network
     volumes:

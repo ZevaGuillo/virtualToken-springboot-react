@@ -4,12 +4,12 @@ spring:
       path: /api/v1
 
   application:
-    name: virtualToken
+    name: "virtualToken"
 
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://postgres-database:5432/virtualtoken
-    username: admin
+    url: jdbc:postgresql://localhost:5432/virtualtoken
+    username: zevaguillo
     password: 123456
 
   jpa:
