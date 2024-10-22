@@ -1,0 +1,19 @@
+version: "3.9"
+services:
+  postgres:
+    image: postgres:15.3
+    container_name: postgres-database
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=alumno
+      - POSTGRES_PASSWORD=123456
+      - POSTGRES_DB=security
+    networks:
+      - spring-network
+    volumes:
+      - db-volume:/var/lib/postgresql/data  # Aquí se especifica la ruta absoluta en el contenedor
+networks:
+  spring-network:
+volumes:
+  db-volume:
