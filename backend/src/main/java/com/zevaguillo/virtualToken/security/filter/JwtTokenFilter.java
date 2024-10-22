@@ -1,7 +1,6 @@
 package com.zevaguillo.virtualToken.security.filter;
 
 import java.io.IOException;
-import java.nio.file.attribute.UserPrincipal;
 import java.util.Collection;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +17,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.zevaguillo.virtualToken.security.service.CustomUserDetailsService;
 import com.zevaguillo.virtualToken.security.utils.JwtUtils;
+import com.zevaguillo.virtualToken.security.utils.UserPrincipal;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

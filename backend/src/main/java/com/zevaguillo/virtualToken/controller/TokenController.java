@@ -17,12 +17,12 @@ import lombok.AllArgsConstructor;
 public class TokenController {
     private final ITokenService tokenService;
 
-    @GetMapping("/generate")
+    @GetMapping("/generarToken")
     public TokenDto generateToken(@RequestParam String cliente) {
         return tokenService.generateToken(cliente);
     }
 
-    @PostMapping("/claim")
+    @PostMapping("/usarToken")
     public boolean claimToken(@RequestParam String cliente, @RequestParam String token) {
         return tokenService.claimToken(cliente, token);
     }
