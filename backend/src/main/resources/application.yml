@@ -16,3 +16,18 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
+
+initial:
+  user:
+    name: zevadmin
+    email: zevaguillo@gmail.com
+    password: 123456
+
+# JWT
+jwt:
+  secret:
+    key: 2b679e478d034e783b1458f923ac82d763505186152d75ece8e69aa566911dff
+  user:
+    generator: ZEVAGUILLO
+  time:
+    expiration: 86400000
