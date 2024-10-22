@@ -1,22 +1,47 @@
 package com.zevaguillo.virtualToken.exception;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.boot.json.JsonParseException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.validation.FieldError;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import com.auth0.jwt.exceptions.JWTVerificationException;
 
 @ControllerAdvice
-public class ApiExceptionHandler {
+public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
+
+    @Override
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
+            HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        Map<String, String> validationErrors = new HashMap<>();
+        List<ObjectError> validationErrorList = ex.getBindingResult().getAllErrors();
+
+        validationErrorList.forEach((error) -> {
+            String fieldName = ((FieldError) error).getField();
+            String validationMsg = error.getDefaultMessage();
+            validationErrors.put(fieldName, validationMsg);
+        });
+        return new ResponseEntity<>(validationErrors, HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(value = { JWTVerificationException.class })
     public ResponseEntity<ApiException> handleJWTVerificationException(JWTVerificationException e) {
         HttpStatus unauthorized = HttpStatus.UNAUTHORIZED;
@@ -66,26 +91,6 @@ public class ApiExceptionHandler {
                 "You do not have the necessary permissions to access this resource.",
                 forbidden);
         return new ResponseEntity<>(apiException, forbidden);
-    }
-
-    @ExceptionHandler(value = { MethodArgumentNotValidException.class })
-    public ResponseEntity<ApiException> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
-        HttpStatus badRequest = HttpStatus.BAD_REQUEST;
-        ApiException apiException = new ApiException(
-                "Validation Error",
-                "Validation failed. Please check your request fields and try again.",
-                badRequest);
-        return new ResponseEntity<>(apiException, badRequest);
-    }
-
-    @ExceptionHandler(value = { HttpMessageNotReadableException.class })
-    public ResponseEntity<ApiException> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
-        HttpStatus badRequest = HttpStatus.BAD_REQUEST;
-        ApiException apiException = new ApiException(
-                "Request Body Error",
-                "Request body is missing or invalid: " + e.getMessage(),
-                badRequest);
-        return new ResponseEntity<>(apiException, badRequest);
     }
 
     @ExceptionHandler(value = { DataIntegrityViolationException.class })
