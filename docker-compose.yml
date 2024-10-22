@@ -1,5 +1,22 @@
 version: "3.9"
 services:
+  spring-api-image:
+    image: spring-api-image
+    container_name: spring-api-container
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/virtualtoken
+      SPRING_DATASOURCE_USERNAME: zevaguillo
+      SPRING_DATASOURCE_PASSWORD: 123456
+    networks:
+      - spring-network
+    depends_on:
+      - postgres
+
   postgres:
     image: postgres:15.3
     container_name: postgres-database
@@ -12,7 +29,7 @@ services:
     networks:
       - spring-network
     volumes:
-      - db-volume:/var/lib/postgresql/data  # Aquí se especifica la ruta absoluta en el contenedor
+      - db-volume:/var/lib/postgresql/data # Aquí se especifica la ruta absoluta en el contenedor
 networks:
   spring-network:
 volumes:
