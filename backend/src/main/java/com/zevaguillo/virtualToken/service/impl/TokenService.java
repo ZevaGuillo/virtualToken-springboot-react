@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.zevaguillo.virtualToken.dto.TokenDto;
+import com.zevaguillo.virtualToken.exception.TokenNotFoundException;
 import com.zevaguillo.virtualToken.persistence.entity.TokenEntity;
 import com.zevaguillo.virtualToken.persistence.entity.UserEntity;
 import com.zevaguillo.virtualToken.persistence.repository.TokenRepository;
@@ -81,20 +82,22 @@ public class TokenService implements ITokenService {
      */
     @Override
     public boolean claimToken(String client, String tokenStr) {
+        // Buscar el usuario por ID
         Optional<UserEntity> user = userRepository.findById(Long.parseLong(client));
+        if (!user.isPresent()) {
+            throw new UsernameNotFoundException("Usuario no encontrado con ID: " + client);
+        }
 
-        if (user.isPresent()) {
-            Optional<TokenEntity> token = tokenRepository.findByUserAndStatus(user.get(), "activo");
+        // Buscar el token asociado al usuario y con estado "activo"
+        Optional<TokenEntity> token = tokenRepository.findByUserAndStatus(user.get(), "activo");
 
-            // Si el token es válido y no ha expirado, marcarlo como "usado"
-            if (token.isPresent() && token.get().getToken().equals(tokenStr)
+        if (token.isPresent()) {
+            if (token.get().getToken().equals(tokenStr)
                     && token.get().getExpirationTime().isAfter(LocalDateTime.now())) {
                 token.get().setStatus("usado");
                 tokenRepository.save(token.get());
-
                 return true;
             } else {
-                // Si el token es inválido o ha expirado, marcarlo como "inactivo"
                 token.get().setStatus("inactivo");
                 tokenRepository.save(token.get());
             }
@@ -107,7 +110,7 @@ public class TokenService implements ITokenService {
      * Obtiene una página de tokens filtrada según los criterios proporcionados.
      * 
      * @param userId    El ID del usuario cuyos tokens se van a buscar
-     *                  
+     * 
      * @param token     El valor parcial o completo del token para buscar
      *                  .
      * @param startDate La fecha y hora de inicio para filtrar tokens generados
@@ -129,7 +132,8 @@ public class TokenService implements ITokenService {
             String status, Pageable pageable) {
         // Manejo de valores por defecto para fechas si no se proporcionan
         if (startDate == null) {
-            startDate = LocalDateTime.of(1970, 1, 1, 0, 0);;
+            startDate = LocalDateTime.of(1970, 1, 1, 0, 0);
+            ;
         }
         if (endDate == null) {
             endDate = LocalDateTime.now();
@@ -145,7 +149,8 @@ public class TokenService implements ITokenService {
             tokenEntities = tokenRepository.findAllByUserId(userId, token, startDate, endDate, pageable);
         } else {
             // Filtrar tokens según el estado proporcionado
-            tokenEntities = tokenRepository.findAllByUserIdAndStatus(userId, token, startDate, endDate, status, pageable);
+            tokenEntities = tokenRepository.findAllByUserIdAndStatus(userId, token, startDate, endDate, status,
+                    pageable);
         }
 
         // Transformación de entidades a DTOs

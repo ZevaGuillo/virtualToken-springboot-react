@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -19,7 +19,13 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { RefreshCw } from "lucide-react";
+import {
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  Copy,
+  RefreshCw,
+} from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -27,12 +33,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { TokenResponse } from "../interface/Token";
-import { TokenService } from "../service/TokenService";
-import { useAuthStore } from "@/store/useAuthStore";
 import { Badge } from "@/components/ui/badge";
+import useToken from "../hooks/useToken";
+import useTokenHistory from "../hooks/useTokenHistory";
+import useCurl from "../hooks/useCurl";
 
-interface TokenRecord {
+export interface TokenRecord {
   id: number;
   token: string;
   generatedAt: string;
@@ -41,70 +47,26 @@ interface TokenRecord {
 }
 
 const TokenVirtual: React.FC = () => {
-  const [currentToken, setCurrentToken] = useState<string>("");
-  const [timeLeft, setTimeLeft] = useState<number>(60);
-  const [tokenRecords, setTokenRecords] = useState<TokenRecord[]>([]);
-  const [tokenFilter, setTokenFilter] = useState<string>("");
-  const [startDate, setStartDate] = useState<string>("");
-  const [endDate, setEndDate] = useState<string>("");
-  const [usageFilter, setUsageFilter] = useState<string>("all");
-  const user = useAuthStore((state) => state.user);
-
-  const refreshToken = async () => {
-    try {
-      const tokenResponse: TokenResponse = await TokenService.generateToken(
-        user!.id!
-      );
-      setCurrentToken(tokenResponse.token);
-      setTimeLeft(60);
-      // Actualiza el historial de tokens después de generar uno nuevo
-      fetchTokenHistory();
-    } catch (error) {
-      console.error("Error al generar token:", error);
-    }
-  };
-
-  const fetchTokenHistory = async () => {
-    try {
-      const response = await TokenService.getTokenHistory({
-        status: usageFilter,
-        token: tokenFilter,
-        startDate: startDate ? `${startDate}T00:00:00` : undefined,
-        endDate: endDate ? `${endDate}T23:59:59` : undefined,
-        page: 0,
-        size: 10,
-      });
-      const records = response.content?.map(
-        (record) =>
-          ({
-            id: record.id,
-            token: record.token,
-            generatedAt: record.tiempoGeneracion,
-            expiredAt: record.tiempoExpiracion,
-            status: record.status,
-          } as TokenRecord)
-      );
-      setTokenRecords(records || []);
-    } catch (error) {
-      console.error("Error al obtener el historial de tokens:", error);
-    }
-  };
+  const { currentToken, timeLeft, refreshToken } = useToken();
+  const {
+    tokenRecords,
+    tokenFilter,
+    setTokenFilter,
+    startDate,
+    setStartDate,
+    endDate,
+    setEndDate,
+    usageFilter,
+    setUsageFilter,
+    currentPage,
+    totalPages,
+    paginate,
+    setCurrentPage
+  } = useTokenHistory();
+  const { curlCommand, copyToClipboard, isCopied } = useCurl(currentToken);
 
   useEffect(() => {
-    fetchTokenHistory();
-  }, [tokenFilter, startDate, endDate, usageFilter]);
-
-  useEffect(() => {
-    if (timeLeft > 0) {
-      const timerId = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
-      return () => clearTimeout(timerId);
-    } else {
-      refreshToken();
-    }
-  }, [timeLeft]);
-
-  useEffect(() => {
-      refreshToken();
+    refreshToken();
   }, []);
 
   return (
@@ -143,6 +105,24 @@ const TokenVirtual: React.FC = () => {
               </DialogContent>
             </Dialog>
           </div>
+          <h5 className="py-3">Usa el token con el siguiente curl:</h5>
+          <div className="bg-muted p-4 rounded-md relative">
+            <pre className="text-sm overflow-x-auto whitespace-pre-wrap break-all">
+              {curlCommand}
+            </pre>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute top-2 right-2"
+              onClick={copyToClipboard}
+            >
+              {isCopied ? (
+                <Check className="h-4 w-4" />
+              ) : (
+                <Copy className="h-4 w-4" />
+              )}
+            </Button>
+          </div>
         </CardContent>
       </Card>
 
@@ -161,7 +141,10 @@ const TokenVirtual: React.FC = () => {
                 type="text"
                 placeholder="Buscar token"
                 value={tokenFilter}
-                onChange={(e) => setTokenFilter(e.target.value)}
+                onChange={(e) => {
+                  setCurrentPage(1);
+                  setTokenFilter(e.target.value);
+                }}
               />
             </div>
             <div>
@@ -172,7 +155,10 @@ const TokenVirtual: React.FC = () => {
                 id="start-date"
                 type="date"
                 value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
+                onChange={(e) => {
+                  setCurrentPage(1);
+                  setStartDate(e.target.value);
+                }}
               />
             </div>
             <div>
@@ -183,14 +169,23 @@ const TokenVirtual: React.FC = () => {
                 id="end-date"
                 type="date"
                 value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
+                onChange={(e) => {
+                  setCurrentPage(1);
+                  setEndDate(e.target.value);
+                }}
               />
             </div>
             <div>
               <Label htmlFor="usage-filter" className="mb-2 block">
                 Estado
               </Label>
-              <Select value={usageFilter} onValueChange={setUsageFilter}>
+              <Select
+                value={usageFilter}
+                onValueChange={(value) => {
+                  setCurrentPage(1);
+                  setUsageFilter(value);
+                }}
+              >
                 <SelectTrigger id="usage-filter">
                   <SelectValue placeholder="Filtrar por uso" />
                 </SelectTrigger>
@@ -223,12 +218,41 @@ const TokenVirtual: React.FC = () => {
                     {new Date(record.expiredAt).toLocaleString()}
                   </TableCell>
                   <TableCell>
-                    <Badge variant={record.status == 'usado'? "outline": 'secondary'}>{record.status}</Badge>
+                    <Badge
+                      variant={
+                        record.status == "usado" ? "outline" : "secondary"
+                      }
+                    >
+                      {record.status}
+                    </Badge>
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
+          <div className="flex items-center justify-between space-x-2 py-4">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => paginate(currentPage - 1)}
+              disabled={currentPage === 1}
+            >
+              <ChevronLeft className="h-4 w-4" />
+              Anterior
+            </Button>
+            <div className="text-sm text-muted-foreground">
+              Página {currentPage} de {totalPages}
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => paginate(currentPage + 1)}
+              disabled={currentPage === totalPages}
+            >
+              Siguiente
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </div>
