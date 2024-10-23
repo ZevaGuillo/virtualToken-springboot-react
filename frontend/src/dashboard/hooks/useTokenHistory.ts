@@ -50,7 +50,7 @@ const useTokenHistory = (currentToken: string) => {
 
   useEffect(() => {
     fetchTokenHistory();
-  }, [tokenFilter, startDate, endDate, usageFilter, user, currentToken]);
+  }, [tokenFilter, startDate, endDate, usageFilter, user, currentToken, currentPage]);
 
   return {
     tokenRecords,
