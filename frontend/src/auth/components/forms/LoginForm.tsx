@@ -1,12 +1,16 @@
 import { Input } from "@/components/ui/input";
 import { LoginFormSchema } from "@/lib/validations/form";
+import { useAuthStore } from "@/store/useAuthStore";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 
 type LoginInput = z.infer<typeof LoginFormSchema>;
 
 export const LoginForm = () => {
+  const navigate = useNavigate();
+  const loginUser = useAuthStore((state) => state.loginUser);
   const {
     register,
     handleSubmit,
@@ -15,9 +19,17 @@ export const LoginForm = () => {
     resolver: zodResolver(LoginFormSchema),
   });
 
-  const onSubmit = (data: LoginInput) => {
-    console.log(data);
+  const onSubmit = async (data: LoginInput) => {
+
+    const { username, password } = data;
+    try {
+      await loginUser(username, password);
+      navigate("/");
+    } catch (error) {
+      console.log("No se pudo autenticar :", error);
+    }
   };
+
 
   return (
     <form
