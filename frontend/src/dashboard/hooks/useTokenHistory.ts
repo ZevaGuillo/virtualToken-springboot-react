@@ -3,7 +3,7 @@ import { TokenRecord } from "../components/TokenRecord";
 import { useAuthStore } from "@/store/useAuthStore";
 import { TokenService } from "../service/TokenService";
 
-const useTokenHistory = () => {
+const useTokenHistory = (currentToken: string) => {
   const [tokenRecords, setTokenRecords] = useState<TokenRecord[]>([]);
   const [tokenFilter, setTokenFilter] = useState("");
   const [startDate, setStartDate] = useState("");
@@ -50,7 +50,7 @@ const useTokenHistory = () => {
 
   useEffect(() => {
     fetchTokenHistory();
-  }, [tokenFilter, startDate, endDate, usageFilter, user]);
+  }, [tokenFilter, startDate, endDate, usageFilter, user, currentToken]);
 
   return {
     tokenRecords,

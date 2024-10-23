@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -47,7 +46,7 @@ export interface TokenRecord {
 }
 
 const TokenVirtual: React.FC = () => {
-  const { currentToken, timeLeft, refreshToken } = useToken();
+  const { currentToken, timeLeft } = useToken();
   const {
     tokenRecords,
     tokenFilter,
@@ -62,12 +61,9 @@ const TokenVirtual: React.FC = () => {
     totalPages,
     paginate,
     setCurrentPage
-  } = useTokenHistory();
+  } = useTokenHistory(currentToken);
   const { curlCommand, copyToClipboard, isCopied } = useCurl(currentToken);
 
-  useEffect(() => {
-    refreshToken();
-  }, []);
 
   return (
     <div className="container mx-auto p-4 max-w-4xl">

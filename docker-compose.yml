@@ -1,7 +1,22 @@
 version: "3.9"
 services:
+  react-frontend:
+    image: react-frontend
+    container_name: react-frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    environment:
+      - VITE_BACKEND_URL=http://spring-api-image:8080/api/v1
+    networks:
+      - spring-network
+    depends_on:
+      - spring-api-image
+
   spring-api-image:
-    image: spring-api-image
+    image: spring-api-image:v1
     container_name: spring-api-container
     build:
       context: ./backend

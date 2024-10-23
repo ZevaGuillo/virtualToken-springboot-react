@@ -2,7 +2,6 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/store/useAuthStore";
 import { LogOut } from "lucide-react";
-import React from "react";
 
 export const Navbar = () => {
     const logoutUser = useAuthStore((state) => state.logoutUser);
