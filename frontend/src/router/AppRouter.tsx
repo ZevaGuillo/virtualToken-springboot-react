@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { LoginPage } from "../auth/pages/LoginPage";
 import { DashboardPage } from "../dashboard/pages/DashboardPage";
 import { useAuthStore } from "@/store/useAuthStore";
+import { RegisterPage } from "@/auth/pages/RegisterPage";
 
 export const AppRouter = () => {
   // const logged = isLogin();
@@ -18,11 +19,6 @@ return (
               element={<DashboardPage/>}
             />
 
-            {/* <Route
-              path="/post/destacados"
-              element={<></>}
-            /> */}
-
             <Route
               path="/*"
               element={<Navigate to="/" />}
@@ -33,6 +29,10 @@ return (
             <Route
               path="/login"
               element={<LoginPage/>}
+            />
+            <Route
+              path="/register"
+              element={<RegisterPage/>}
             />
             <Route
               path="/*"

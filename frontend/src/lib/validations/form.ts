@@ -28,10 +28,7 @@ export const RegisterFormSchema = z.object({
     username: z
         .string()
         .min(4, { message: 'Username obligatorio' })
-        .regex(/^[a-zA-Z0-9]{5,12}$/, { message: 'Solo letras y números, longitud entre 5 y 12' }),
-    lastname: z
-        .string()
-        .min(1, { message: 'Apellido obligatorio' }),
+        .regex(/^[a-zA-Z0-9]{5,12}$/, { message: 'Solo letras y números, longitud entre 5 y 12' })
 })
     .refine((data) => data.password === data.repeatPassword, {
         path: ['repeatPassword'],

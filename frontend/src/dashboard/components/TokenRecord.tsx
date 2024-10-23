@@ -103,6 +103,10 @@ const TokenVirtual: React.FC = () => {
     }
   }, [timeLeft]);
 
+  useEffect(() => {
+      refreshToken();
+  }, []);
+
   return (
     <div className="container mx-auto p-4 max-w-4xl">
       <Card className="mb-8">
