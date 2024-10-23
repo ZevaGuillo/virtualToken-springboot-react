@@ -1,6 +1,7 @@
 package com.zevaguillo.virtualToken.persistence.repository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -36,4 +37,8 @@ public interface TokenRepository extends JpaRepository<TokenEntity, Long> {
                         @Param("endDate") LocalDateTime endDate,
                         @Param("status") String status,
                         Pageable pageable);
+
+        // Encuentra todos los tokens que están "activos" y cuya fecha de expiración ha
+        // pasado
+        List<TokenEntity> findAllByStatusAndExpirationTimeBefore(String status, LocalDateTime expirationTime);
 }

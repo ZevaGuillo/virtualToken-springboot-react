@@ -3,6 +3,7 @@ package com.zevaguillo.virtualToken;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.http.HttpHeaders;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
@@ -36,6 +37,7 @@ import io.swagger.v3.oas.annotations.security.SecurityScheme;
         scheme = "bearer",
         bearerFormat = "JWT"
 )
+@EnableScheduling
 public class VirtualTokenApplication {
 
 	public static void main(String[] args) {
