@@ -1,4 +1,6 @@
+import TokenVirtual from "../components/TokenRecord";
+import { Layout } from "../layout/Layout";
 
 export const DashboardPage = () => {
-  return <div>DashboardPage</div>;
+  return <Layout><TokenVirtual/></Layout>;
 };
