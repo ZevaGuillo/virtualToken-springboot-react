@@ -3,14 +3,43 @@
 ## Descripción
 El **Virtual Token Service** es una aplicación basada en Spring Boot y React que permite la gestión de tokens virtuales. Proporciona funcionalidades para generar, reclamar y listar tokens, lo que facilita el seguimiento de su uso y estado. Este servicio está diseñado para ser escalable y fácil de integrar con otras aplicaciones.
 
-## Configuración del Proyecto
-1. Clona este repositorio en tu máquina local.
-2. Asegúrate de tener configurada tu base de datos en `application.properties`.
-3. Ejecuta el proyecto con Maven:
+## Instalación
+
+### Prerrequisitos
+
+Asegúrate de tener instalados los siguientes programas antes de comenzar:
+
+- [Git](https://git-scm.com/)
+- [Docker](https://www.docker.com/get-started)
+- [Docker Compose](https://docs.docker.com/compose/)
+
+### Clonar el repositorio
+
+Primero, clona el repositorio en tu máquina local ejecutando el siguiente comando:
+
+```bash
+git clone https://github.com/ZevaGuillo/virtualToken-springboot-react.git
+```
+### Levantar el proyecto con Docker
+
+1. **Navega a la carpeta del proyecto**:
+
    ```bash
-   mvn spring-boot:run
+   cd virtualToken-springboot-react
+   ```
+
+2. **Levanta los contenedores con Docker Compose**:
+   ```bash
+   docker compose up
+   ```
+   Esto descargará las imágenes necesarias, construirá el proyecto y levantará los contenedores.
+   
+3. **Accede a la aplicación**:
+  - Frontend: http://localhost/
+  - Backend: [Swagger UI](http://localhost:8080/api/v1/swagger-ui/index.html)
 
 
+   
 ## Funcionalidades
 - **Generar Token**: Permite crear un nuevo token asociado a un cliente.
 - **Usar Token**: Facilita el reclamo de un token por parte de un cliente.
@@ -18,11 +47,6 @@ El **Virtual Token Service** es una aplicación basada en Spring Boot y React qu
 
 ## Autenticación
 La aplicación utiliza **JWT (JSON Web Tokens)** para la autenticación de usuarios. JWT permite la verificación segura de la identidad del usuario y la protección de los endpoints de la API. Al iniciar sesión, se genera un token que debe ser enviado en las cabeceras de las solicitudes para acceder a los recursos protegidos.
-
-## Documentación de la API
-La documentación de la API está disponible a través de Swagger UI. Puedes acceder a ella mediante la siguiente URL:
-
-[Swagger UI](http://localhost:8080/api/v1/swagger-ui/index.html)
 
 ## Estructura del Proyecto
 ### Controlador `TokenController`
