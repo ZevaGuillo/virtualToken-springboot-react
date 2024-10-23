@@ -3,6 +3,8 @@ package com.zevaguillo.virtualToken.service.impl;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -101,4 +103,57 @@ public class TokenService implements ITokenService {
         return false;
     }
 
+    /**
+     * Obtiene una página de tokens filtrada según los criterios proporcionados.
+     * 
+     * @param userId    El ID del usuario cuyos tokens se van a buscar
+     *                  
+     * @param token     El valor parcial o completo del token para buscar
+     *                  .
+     * @param startDate La fecha y hora de inicio para filtrar tokens generados
+     *                  desde esa fecha .
+     * @param endDate   La fecha y hora de fin para filtrar tokens generados hasta
+     *                  esa fecha .
+     * @param status    El estado de los tokens a buscar: "all" para todos, "used"
+     *                  para los usados,
+     *                  o "unused" para los no usados. Si es nulo, se toma como
+     *                  "all" .
+     * @param pageable  Objeto de paginación para definir el tamaño de página,
+     *                  número de página y
+     *                  cualquier configuración adicional de paginación .
+     * @return Una página que contiene los tokens filtrados.
+     */
+    @Override
+    public Page<TokenDto> getAllTokensByFilters(Long userId, String token, LocalDateTime startDate,
+            LocalDateTime endDate,
+            String status, Pageable pageable) {
+        // Manejo de valores por defecto para fechas si no se proporcionan
+        if (startDate == null) {
+            startDate = LocalDateTime.of(1970, 1, 1, 0, 0);;
+        }
+        if (endDate == null) {
+            endDate = LocalDateTime.now();
+        }
+
+        if (status == null || status.isEmpty()) {
+            status = "all";
+        }
+
+        Page<TokenEntity> tokenEntities;
+        if (status.equals("all")) {
+            // Obtener todos los tokens del usuario sin filtrar por estado
+            tokenEntities = tokenRepository.findAllByUserId(userId, token, startDate, endDate, pageable);
+        } else {
+            // Filtrar tokens según el estado proporcionado
+            tokenEntities = tokenRepository.findAllByUserIdAndStatus(userId, token, startDate, endDate, status, pageable);
+        }
+
+        // Transformación de entidades a DTOs
+        return tokenEntities.map(entity -> new TokenDto(
+                entity.getId(),
+                entity.getToken(),
+                entity.getGenerationTime(),
+                entity.getExpirationTime(),
+                entity.getStatus()));
+    }
 }

@@ -32,5 +32,5 @@ public class TokenEntity {
     private String token;
     private LocalDateTime generationTime;
     private LocalDateTime expirationTime;
-    private String status;
+    private String status; // activo - usado - inactivo
 }
