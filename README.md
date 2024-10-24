@@ -37,7 +37,8 @@ git clone https://github.com/ZevaGuillo/virtualToken-springboot-react.git
 3. **Accede a la aplicación**:
   - Frontend: http://localhost/
   - Backend: [Swagger UI](http://localhost:8080/api/v1/swagger-ui/index.html)
-
+  - Usuario: zevadmin
+  - password: 123456
 
    
 ## Funcionalidades
