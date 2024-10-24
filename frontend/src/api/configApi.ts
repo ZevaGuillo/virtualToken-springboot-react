@@ -2,7 +2,7 @@ import { useAuthStore } from "@/store/useAuthStore";
 import axios from "axios";
 
 export const configApi = axios.create({
-    baseURL: import.meta.env.VITE_BACKEND_URL
+    baseURL: import.meta.env.VITE_APP_BACKEND_ADDRESS + "/api/v1"
   });
   
   // interceptor

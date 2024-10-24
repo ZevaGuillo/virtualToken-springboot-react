@@ -1,24 +1,22 @@
-# Fetching the latest node image on alpine linux
-FROM node:18-alpine AS builder
-
-# Setting up the work directory
-WORKDIR /app
-
-# Installing dependencies
-COPY ./package.json ./
+FROM node:20-slim as builder
+WORKDIR /usr/src/frontend
+COPY package*.json ./
 RUN npm install
-
-# Copying all the files in our project
 COPY . .
-
-# Building our application
 RUN npm run build
+EXPOSE 8080
 
-# Fetching the latest nginx image
 FROM nginx
-
-# Copying built assets from builder
-COPY --from=builder /app/dist /usr/share/nginx/html
-
-# Copying our nginx.conf
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+WORKDIR /usr/share/nginx/html
+#RUN apt-get update && apt-get install -y certbot python3-certbot-nginx vim
+# Remove default nginx configuration
+RUN rm /etc/nginx/conf.d/*
+# Remove default nginx static assets
+RUN rm -rf /usr/share/nginx/html/*
+COPY --from=builder /usr/src/frontend/dist /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/
+EXPOSE 80
+RUN useradd -ms /bin/bash appuser
+RUN chown -R appuser:appuser /etc/nginx/conf.d/ /var/cache/nginx/ /var/run/
+USER appuser
+ENTRYPOINT ["nginx", "-g", "daemon off;"]

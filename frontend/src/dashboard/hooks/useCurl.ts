@@ -7,8 +7,8 @@ const useCurl = (currentToken: string) => {
   const token = useAuthStore((state) => state.authToken);
 
   const curlCommand = `curl --location --request POST "${
-    import.meta.env.VITE_BACKEND_URL
-  }/token/usarToken?cliente=${user!.id!}&token=${currentToken}" \
+    import.meta.env.VITE_APP_BACKEND_ADDRESS
+  }/api/v1/token/usarToken?cliente=${user!.id!}&token=${currentToken}" \
 --header "Authorization: Bearer ${token}"`;
 
   const copyToClipboard = async () => {
